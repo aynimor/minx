@@ -1,16 +1,19 @@
 import socket
 import json
+import sanic
 
 from request import Request
 from utils import log
+from response import text, HTTPResponse
+from router import test, test_sleep
 
-
-def response(request: Request):
-    # print(request.method)
-    # print(request.url)
-    # print(request.protocol)
-    # print(request.args)
-    return f"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n{json.dumps(request.headers)}{json.dumps(request.headers.cookies)}".encode("utf-8")
+# def response(request: Request):
+#     print(response.__name__)
+#     # print(request.method)
+#     # print(request.url)
+#     # print(request.protocol)
+#     # print(request.args)
+#     return f"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n{json.dumps(request.headers)}{json.dumps(request.headers.cookies)}".encode("utf-8")
 
 
 def recv_data(conn):
@@ -28,8 +31,25 @@ def recv_data(conn):
     return data
 
 
+def get_router(url):
+    router = {
+        "/test": test,
+        "/sleep": test_sleep,
+    }
+    return router.get(url, None)
+
+
 def handle_request(request: Request):
-    return response(request)
+    url = request.url
+    handler = get_router(url)
+    if handler is None:
+        return text("404 Not Found", status=404)
+
+    resp = handler(request)
+    if resp is None:
+        return text("Internal Server Error", status=500)
+
+    return resp
 
 
 def main(host=None, port=None):
@@ -52,13 +72,16 @@ def main(host=None, port=None):
                 request = Request(data)
                 log(f"[{addr[0]}:{addr[1]}] {request.method} {request.protocol[0]}://{host}:{port}{request.url}")
                 response = handle_request(request)
-                conn.send(response)
+                if isinstance(response, HTTPResponse):
+                    response = str(response)
+                conn.send(response.encode())
                 conn.close()
             except Exception as e:
                 print("except", e)
                 break
             finally:
-                conn.close()
+                if conn:
+                    conn.close()
                 
 
 if __name__ == "__main__":

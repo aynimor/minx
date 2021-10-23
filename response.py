@@ -14,20 +14,20 @@ class HTTPResponse():
         content_type: str = None,
     ):
         self.content_type: str = content_type
-        self.body = self._encode_body(body)
+        self.body = body
         self.status = status
         self.headers = Header(headers or {})
         self._cookies = None
         super().__init__()
-    
-    def _encode_body(self, body):
-        if body is None:
-            return b""
-        else:
-            return body.encode() if hasattr(body, "encode") else body
-    
+
     def __repr__(self) -> str:
         return self.__str__()
+    
+    def __str__(self) -> str:
+        self.headers["Content-Type"] = self.content_type
+        headers = "\r\n".join([f"{k}: {v}" for k, v in self.headers.items()])
+        # TODO: Set-Cookie ... Content-Length: ...
+        return f"""HTTP/1.1 {self.status} OK\r\n{headers}\r\n\r\n{self.body}"""
 
 
 def json(

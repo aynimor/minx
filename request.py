@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 from urllib import parse
+import json
 
 from constants import DEFAULT_HTTP_CONTENT_TYPE
 from compat import Header
@@ -14,8 +15,6 @@ class Request(object):
         self.raw_data = raw_data
         (self.head, self.body) = self.raw_data.split(b"\r\n\r\n", 2)
         
-        self.url = self.head.split(b" ")[1].decode()
-
         self._parsed_protocol: Dict[str, Any] = None
         self._parsed_method: Dict[str, Any] = None
         self._parsed_url: Dict[str, Any] = None
