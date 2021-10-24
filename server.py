@@ -1,4 +1,5 @@
 import socket
+import threading
 import typing
 
 if typing.TYPE_CHECKING:
@@ -56,7 +57,7 @@ class HTTPServer:
     def _handle_request(self):
         try:
             request, addr = self.get_request()
-            self.process_request(request, addr)
+            threading.Thread(target=self.process_request, args=(request, addr)).start()
         except:
             self.shutdown_request(request)
             raise
