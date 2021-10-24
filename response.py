@@ -2,7 +2,7 @@ from typing import Dict, Union
 from json import dumps as json_dumps
 from urllib.parse import quote_plus
 
-from compat import Header
+from .compat import Header
 
 
 class HTTPResponse():

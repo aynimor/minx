@@ -1,10 +1,10 @@
-from typing import Any, Dict, List
-from urllib import parse
 import json
+from urllib import parse
+from typing import Any, Dict, List
 
-from constants import DEFAULT_HTTP_CONTENT_TYPE
-from compat import Header
-from utils import parse_content_type, paser_x_www_form_urlencoded, parse_form_data
+from .constants import DEFAULT_HTTP_CONTENT_TYPE
+from .compat import Header
+from .utils import parse_content_type, paser_x_www_form_urlencoded, parse_form_data
 
 
 class Request(object):
@@ -69,8 +69,10 @@ class Request(object):
             content_type = self.headers.get("Content-Type", DEFAULT_HTTP_CONTENT_TYPE)
             content_type, parameter = parse_content_type(content_type)
             if content_type == "application/x-www-form-urlencoded":
+                # 完成 解析 form 表单功能
                 self._parsed_form = paser_x_www_form_urlencoded(self.body.decode("utf-8"))
             elif content_type == "multipart/form-data":
+                # 完成 解析 form 文件上传功能
                 self._parsed_files = parse_form_data(self.body, parameter)
         return self._parsed_form
     
